@@ -1,0 +1,882 @@
+/* ==========================================================================
+   CYBER-LFSR : Spotify-Inspired Dark Design System (DESIGN.md + PRD.md)
+   ========================================================================== */
+
+:root {
+  /* Surface Palette */
+  --bg-base: #121212;
+  --bg-surface: #181818;
+  --bg-elevated: #1f1f1f;
+  --bg-card: #252525;
+  --bg-card-alt: #272727;
+
+  /* Text Hierarchy */
+  --text-base: #ffffff;
+  --text-subdued: #b3b3b3;
+  --text-near-white: #cbcbcb;
+  --text-bright: #fdfdfd;
+
+  /* Functional Brand & Semantic Bit Colors */
+  --accent-green: #1ed760;
+  --accent-green-hover: #3be477;
+  --accent-green-border: #1db954;
+  --semantic-blue: #539df5;
+  --semantic-orange: #ffa42b;
+  --semantic-red: #f3727f;
+
+  /* Borders & Dividers */
+  --border-gray: #4d4d4d;
+  --border-light: #7c7c7c;
+  --separator: rgba(179, 179, 179, 0.16);
+
+  /* Elevation Shadows (DESIGN.md Section 2 & 6) */
+  --shadow-card: rgba(0, 0, 0, 0.3) 0px 8px 8px;
+  --shadow-heavy: rgba(0, 0, 0, 0.5) 0px 8px 24px;
+  --shadow-inset-input: rgb(18, 18, 18) 0px 1px 0px, rgb(124, 124, 124) 0px 0px 0px 1px inset;
+  --shadow-inset-input-focus: rgb(18, 18, 18) 0px 1px 0px, rgb(255, 255, 255) 0px 0px 0px 2px inset;
+  --shadow-inset-input-error: rgb(18, 18, 18) 0px 1px 0px, rgb(243, 114, 127) 0px 0px 0px 2px inset;
+
+  /* Typography */
+  --font-title: 'SpotifyMixUITitle', 'CircularSp', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-sans: 'SpotifyMixUI', 'CircularSp', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Radii (DESIGN.md Section 5) */
+  --radius-badge: 4px;
+  --radius-card: 8px;
+  --radius-pill: 500px;
+  --radius-full-pill: 9999px;
+  --radius-circle: 50%;
+}
+
+/* Base Reset & Theme Foundation */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--bg-base);
+  color: var(--text-base);
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--bg-base);
+  color: var(--text-base);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* R-39 Interaction Affordances: Base Cursor Layer */
+a[href],
+button:not(:disabled),
+summary,
+select:not(:disabled),
+label[for],
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled),
+input[type="range"]:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="tab"]:not([aria-disabled="true"]),
+[role="switch"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* R-32 Keyboard Focus Visibility */
+:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+/* Skip Link for Keyboard Accessibility */
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 16px;
+  z-index: 9999;
+  background: var(--accent-green);
+  color: #000000;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: var(--radius-full-pill);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Background tsParticles Canvas Layer */
+#tsparticles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 20px 48px;
+}
+
+/* ==========================================================================
+   Typography Rules (DESIGN.md Section 3)
+   ========================================================================== */
+
+.section-title {
+  font-family: var(--font-title);
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-weight: 700;
+  color: var(--text-base);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.feature-heading {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-base);
+  margin: 0;
+}
+
+.caption-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-subdued);
+  letter-spacing: 0.04em;
+}
+
+.mono-code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Surface Cards & Panels (DESIGN.md Section 4 & 6)
+   ========================================================================== */
+
+.surface-panel {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.elevated-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.elevated-card:hover {
+  background-color: var(--bg-card-alt);
+}
+
+.floating-bar {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-heavy);
+}
+
+/* ==========================================================================
+   Buttons: Pill & Circular Geometry (DESIGN.md Section 4)
+   ========================================================================== */
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 20px;
+  border-radius: var(--radius-full-pill);
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: transform 0.12s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-pill:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Spotify Green Functional Primary CTA */
+.btn-pill-primary {
+  background-color: var(--accent-green);
+  color: #000000;
+}
+
+.btn-pill-primary:hover:not(:disabled) {
+  background-color: var(--accent-green-hover);
+  transform: scale(1.02);
+}
+
+/* Dark Pill Secondary Action */
+.btn-pill-dark {
+  background-color: var(--bg-elevated);
+  color: var(--text-base);
+  box-shadow: inset 0 0 0 1px var(--border-gray);
+}
+
+.btn-pill-dark:hover:not(:disabled) {
+  background-color: var(--bg-card-alt);
+  box-shadow: inset 0 0 0 1px var(--text-base);
+}
+
+/* Outlined Pill Button */
+.btn-pill-outline {
+  background-color: transparent;
+  color: var(--text-base);
+  border: 1px solid var(--border-light);
+}
+
+.btn-pill-outline:hover:not(:disabled) {
+  border-color: var(--text-base);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Danger / Fix Pill Button */
+.btn-pill-danger {
+  background-color: rgba(243, 114, 127, 0.16);
+  color: var(--semantic-red);
+  border: 1px solid var(--semantic-red);
+}
+
+.btn-pill-danger:hover:not(:disabled) {
+  background-color: var(--semantic-red);
+  color: #000000;
+}
+
+/* Circular Play / Pause Control (border-radius: 50%) */
+.btn-circle-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 12px;
+  border-radius: var(--radius-circle);
+  border: none;
+  background-color: var(--accent-green);
+  color: #000000;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.14s ease, background-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.btn-circle-play:hover:not(:disabled) {
+  background-color: var(--accent-green-hover);
+  transform: scale(1.06);
+}
+
+.btn-circle-play:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn-circle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-circle);
+  border: none;
+  background-color: var(--bg-elevated);
+  color: var(--text-base);
+  box-shadow: inset 0 0 0 1px var(--border-gray);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.btn-circle-icon:hover:not(:disabled) {
+  background-color: var(--bg-card-alt);
+  box-shadow: inset 0 0 0 1px var(--text-base);
+}
+
+/* Mode Toggle Segmented Pill */
+.mode-pill-group {
+  display: inline-flex;
+  background-color: var(--bg-base);
+  padding: 4px;
+  border-radius: var(--radius-full-pill);
+  box-shadow: var(--shadow-inset-input);
+  gap: 4px;
+}
+
+.mode-pill-btn {
+  min-height: 40px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-subdued);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.mode-pill-btn[aria-pressed="true"] {
+  background-color: var(--accent-green);
+  color: #000000;
+}
+
+.mode-pill-btn[aria-pressed="false"]:hover {
+  color: var(--text-base);
+  background-color: var(--bg-elevated);
+}
+
+/* ==========================================================================
+   Inputs with Inset Border Shadow (DESIGN.md Section 4 & 6)
+   ========================================================================== */
+
+.input-pill {
+  width: 100%;
+  min-height: 44px;
+  background-color: var(--bg-elevated);
+  color: var(--text-base);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  font-size: 14px;
+  box-shadow: var(--shadow-inset-input);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.input-pill::placeholder {
+  color: var(--text-subdued);
+  opacity: 0.75;
+}
+
+.input-pill:hover:not(:disabled) {
+  background-color: var(--bg-card);
+}
+
+.input-pill:focus {
+  outline: none;
+  background-color: var(--bg-card);
+  box-shadow: var(--shadow-inset-input-focus);
+}
+
+.input-pill.input-error {
+  box-shadow: var(--shadow-inset-input-error);
+}
+
+select.input-pill {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 42px;
+}
+
+/* ==========================================================================
+   Tap Toggle Buttons & Semantic Bit Blocks
+   ========================================================================== */
+
+.tap-toggle-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: var(--radius-card);
+  background-color: var(--bg-elevated);
+  color: var(--text-subdued);
+  border: 1px solid var(--border-gray);
+  font-family: var(--font-mono);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.tap-toggle-btn:hover {
+  background-color: var(--bg-card-alt);
+  color: var(--text-base);
+  border-color: var(--border-light);
+}
+
+.tap-toggle-btn[aria-pressed="true"] {
+  background-color: rgba(255, 164, 43, 0.16);
+  color: var(--semantic-orange);
+  border: 2px solid var(--semantic-orange);
+  font-weight: 700;
+}
+
+/* Bit Visualization Cells (Semantic Color Palette) */
+.bit-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 34px;
+  border-radius: 6px;
+  background-color: var(--bg-elevated);
+  color: var(--text-base);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--border-gray);
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  user-select: none;
+}
+
+.bit-box.bit-active-clock {
+  background-color: rgba(30, 215, 96, 0.22);
+  border: 2px solid var(--accent-green);
+  color: var(--accent-green);
+  transform: translateY(-2px);
+}
+
+.bit-box.bit-processed {
+  background-color: rgba(83, 157, 245, 0.14);
+  border-color: rgba(83, 157, 245, 0.45);
+  color: var(--text-near-white);
+}
+
+/* Panel 3: LFSR Register Stage & Dynamic SVG Circuit */
+.lfsr-stage-wrapper {
+  position: relative;
+  background-color: var(--bg-base);
+  border-radius: var(--radius-card);
+  padding: 20px 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  overflow-x: auto;
+}
+
+.lfsr-circuit-canvas {
+  position: relative;
+  min-width: max(660px, 100%);
+  width: max-content;
+  padding-top: 88px;
+  padding-bottom: 16px;
+}
+
+#tap-circuit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lfsr-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.register-cells-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  flex: 1;
+}
+
+/* Individual LFSR Register Cell */
+.reg-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 64px;
+  height: 74px;
+  border-radius: var(--radius-card);
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-gray);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-mono);
+  will-change: transform;
+}
+
+.reg-cell-index {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-subdued);
+  margin-bottom: 2px;
+}
+
+.reg-cell-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-base);
+  line-height: 1.1;
+}
+
+.reg-cell-role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-badge);
+}
+
+/* Semantic States for Register Cells */
+/* 1. Active Tap Position (#ffa42b) */
+.reg-cell.is-tap {
+  border-color: var(--semantic-orange);
+  background-color: rgba(255, 164, 43, 0.13);
+}
+
+.reg-cell.is-tap .reg-cell-index {
+  color: var(--semantic-orange);
+}
+
+/* 2. Newly Inserted Feedback Bit b_new at MSB (#1ed760) */
+.reg-cell.is-new-bit {
+  border-color: var(--accent-green);
+  background-color: rgba(30, 215, 96, 0.16);
+}
+
+.reg-cell.is-new-bit .reg-cell-index {
+  color: var(--accent-green);
+}
+
+/* 3. Exiting Output Bit b_0 at LSB (#539df5) */
+.reg-cell.is-out-bit {
+  border-color: var(--semantic-blue);
+  background-color: rgba(83, 157, 245, 0.16);
+}
+
+.reg-cell.reg-cell-exiting {
+  border-color: var(--semantic-blue);
+  border-style: dashed;
+  background-color: rgba(83, 157, 245, 0.22);
+}
+
+.reg-cell.reg-cell-exiting .reg-cell-index {
+  color: var(--semantic-blue);
+}
+
+/* Dedicated Slot Boxes for b_new (Left) and K_t Output (Right) */
+.io-slot-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  height: 78px;
+  padding: 8px 12px;
+  border-radius: var(--radius-card);
+  font-family: var(--font-mono);
+  background-color: var(--bg-surface);
+}
+
+.io-slot-feedback {
+  border: 2px dashed var(--accent-green);
+  color: var(--accent-green);
+}
+
+.io-slot-output {
+  border: 2px dashed var(--semantic-blue);
+  color: var(--semantic-blue);
+}
+
+/* Floating XOR Gate Badge inside SVG overlay zone */
+.xor-gate-node {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  width: max-content;
+  margin-inline: auto;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  border-radius: var(--radius-full-pill);
+  background-color: var(--bg-card);
+  border: 2px solid var(--semantic-orange);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-base);
+  white-space: nowrap;
+}
+
+/* Keystream Stream Strip */
+.keystream-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px;
+  background-color: var(--bg-base);
+  border-radius: var(--radius-card);
+  min-height: 54px;
+  align-items: center;
+}
+
+.ks-bit-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 40px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  background-color: var(--bg-elevated);
+  color: var(--text-subdued);
+  border: 1px solid var(--border-gray);
+}
+
+.ks-bit-pill.ks-filled {
+  background-color: rgba(83, 157, 245, 0.16);
+  color: var(--semantic-blue);
+  border-color: var(--semantic-blue);
+}
+
+.ks-bit-pill.ks-current {
+  background-color: var(--semantic-blue);
+  color: #000000;
+  border-color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   Panel 4: Bitwise XOR Matrix Table
+   ========================================================================== */
+
+.xor-matrix-scroll {
+  overflow-x: auto;
+  background-color: var(--bg-base);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.xor-matrix-table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-family: var(--font-mono);
+  width: max-content;
+}
+
+.xor-matrix-table th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--bg-surface);
+  color: var(--text-subdued);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.xor-cell {
+  width: 32px;
+  height: 34px;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 6px;
+  background-color: var(--bg-elevated);
+  color: var(--text-subdued);
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.xor-cell.byte-boundary {
+  margin-right: 8px;
+}
+
+.xor-cell.col-computed-input {
+  color: var(--text-base);
+  background-color: var(--bg-card);
+}
+
+.xor-cell.col-computed-ks {
+  color: var(--semantic-blue);
+  background-color: rgba(83, 157, 245, 0.14);
+}
+
+.xor-cell.col-computed-out {
+  color: var(--accent-green);
+  background-color: rgba(30, 215, 96, 0.15);
+}
+
+.xor-cell.col-active {
+  border: 2px solid var(--accent-green);
+  background-color: rgba(30, 215, 96, 0.26);
+  color: #ffffff;
+  transform: scale(1.06);
+}
+
+/* Alert & Validation Banners (#f3727f / #ffa42b / #539df5) */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-card);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.alert-error {
+  background-color: rgba(243, 114, 127, 0.14);
+  border: 1px solid var(--semantic-red);
+  color: var(--semantic-red);
+}
+
+.alert-warning {
+  background-color: rgba(255, 164, 43, 0.14);
+  border: 1px solid var(--semantic-orange);
+  color: var(--semantic-orange);
+}
+
+.alert-info {
+  background-color: rgba(83, 157, 245, 0.14);
+  border: 1px solid var(--semantic-blue);
+  color: var(--semantic-blue);
+}
+
+/* Status Badges (DESIGN.md Section 3 & 5: 4px radius) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-badge);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.badge-green {
+  background-color: rgba(30, 215, 96, 0.16);
+  color: var(--accent-green);
+}
+
+.badge-orange {
+  background-color: rgba(255, 164, 43, 0.16);
+  color: var(--semantic-orange);
+}
+
+.badge-blue {
+  background-color: rgba(83, 157, 245, 0.16);
+  color: var(--semantic-blue);
+}
+
+.badge-red {
+  background-color: rgba(243, 114, 127, 0.18);
+  color: var(--semantic-red);
+}
+
+/* ==========================================================================
+   Responsive Breakpoints (DESIGN.md Section 8 & antislop R-03)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .app-shell {
+    padding: 12px 14px 40px;
+  }
+
+  .surface-panel {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .reg-cell {
+    width: 54px;
+    height: 66px;
+  }
+
+  .reg-cell-val {
+    font-size: 18px;
+  }
+
+  .btn-pill {
+    padding: 8px 14px;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-shell {
+    padding: 10px 10px 32px;
+  }
+
+  .surface-panel {
+    padding: 14px 12px;
+  }
+
+  .mode-pill-group {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .mode-pill-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* R-39 Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

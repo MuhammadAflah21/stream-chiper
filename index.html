@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYBER-LFSR: Interactive Stream Cipher Visual Simulator</title>
+
+  <!-- Fonts: Plus Jakarta Sans (SpotifyMixUI fallback) & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Core Theme Design System (DESIGN.md) -->
+  <link rel="stylesheet" href="css/theme.css" />
+
+  <!-- Tailwind CSS Play CDN + External Animation & Visualization Libraries -->
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js" defer></script>
+
+  <!-- Application Modules -->
+  <script src="js/lfsr-engine.js" defer></script>
+  <script src="js/animator.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <a href="#main-simulator" class="skip-link">Loncat ke Area Simulasi Utama</a>
+
+  <!-- Low-Density Background Binary Particle Layer (#121212) -->
+  <div id="tsparticles" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- ====================================================================
+         HEADER STATUS & QUICK NAVIGATION
+         ==================================================================== -->
+    <header class="surface-panel mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div
+          id="lottie-lock"
+          class="w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center shrink-0"
+          aria-hidden="true"
+        ></div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="section-title">CYBER-LFSR</h1>
+            <span id="header-mode-badge" class="status-badge badge-green">MODE: ENKRIPSI</span>
+            <span id="header-test-badge" class="status-badge badge-green mono-code">VERIFIKASI "HI" → D2 B8: LULUS</span>
+          </div>
+          <p class="text-xs text-[#b3b3b3] mt-0.5">
+            Simulator Visual Interaktif Stream Cipher Berbasis Linear Feedback Shift Register (Right-Shift &amp; Bitwise XOR)
+          </p>
+        </div>
+      </div>
+
+      <nav aria-label="Status Simulasi dan Pintasan" class="flex flex-wrap items-center gap-2.5">
+        <span id="header-clock-badge" class="status-badge badge-blue mono-code">CLOCK: 0 / 16</span>
+        <span id="header-period-badge" class="status-badge badge-orange mono-code">N=4 BIT • T_MAX=15</span>
+        <button
+          type="button"
+          id="btn-load-test-case"
+          class="btn-pill btn-pill-dark"
+          title="Muat parameter standar PRD: Plaintext HI, Register 4-bit, Seed 1001, Tap b1 XOR b0"
+        >
+          Kasus Uji "HI"
+        </button>
+        <button
+          type="button"
+          id="btn-toggle-bg-motion"
+          class="btn-pill btn-pill-outline"
+          aria-pressed="false"
+        >
+          Partikel: Aktif
+        </button>
+      </nav>
+    </header>
+
+    <!-- ====================================================================
+         MAIN 4-PANEL SIMULATOR WORKSPACE
+         ==================================================================== -->
+    <main id="main-simulator" class="flex flex-col gap-5">
+      <!-- PANEL 1: KONTROL & KONFIGURASI PARAMETER LFSR -->
+      <section aria-labelledby="heading-panel-1" class="surface-panel">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-4 mb-4 border-b border-[#272727]">
+          <div>
+            <h2 id="heading-panel-1" class="feature-heading">1. Kontrol &amp; Konfigurasi Parameter LFSR</h2>
+            <p class="text-xs text-[#b3b3b3] mt-0.5">
+              Atur mode operasi, panjang register geser (3 hingga 16 bit), nilai awal (seed), posisi tap polinomial, serta pesan input.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Mode Enkripsi vs Dekripsi -->
+            <div class="mode-pill-group" role="group" aria-label="Pilih Mode Operasi">
+              <button type="button" id="btn-mode-encrypt" class="mode-pill-btn" aria-pressed="true">
+                Enkripsi
+              </button>
+              <button type="button" id="btn-mode-decrypt" class="mode-pill-btn" aria-pressed="false">
+                Dekripsi
+              </button>
+            </div>
+
+            <!-- Format Input Dekripsi (Hex vs Biner) -->
+            <div
+              id="decrypt-format-wrapper"
+              class="mode-pill-group hidden"
+              role="group"
+              aria-label="Pilih Format Input Ciphertext"
+            >
+              <button type="button" id="btn-dec-format-hex" class="mode-pill-btn" aria-pressed="true">
+                Input Hex
+              </button>
+              <button type="button" id="btn-dec-format-bin" class="mode-pill-btn" aria-pressed="false">
+                Input Biner
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris Parameter Register, Seed, dan Preset Polinomial -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <!-- Panjang Register n -->
+          <div class="elevated-card flex flex-col gap-2">
+            <label for="select-reg-length" class="caption-label">
+              PANJANG REGISTER (n: 3 - 16 BIT)
+            </label>
+            <select id="select-reg-length" class="input-pill mono-code"></select>
+            <span class="text-[11px] text-[#b3b3b3]">
+              Mengubah ukuran register otomatis menyesuaikan panjang bit seed dan daftar posisi tap.
+            </span>
+          </div>
+
+          <!-- Nilai Awal (Seed) n-bit -->
+          <div class="elevated-card flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <label for="input-seed" class="caption-label">NILAI AWAL (SEED BINER)</label>
+              <span id="seed-bit-counter" class="text-xs font-bold text-[#1ed760] mono-code">4 / 4 bit</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                id="input-seed"
+                class="input-pill mono-code"
+                value="1001"
+                maxlength="4"
+                placeholder="Misal: 1001"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button
+                type="button"
+                id="btn-shuffle-seed"
+                class="btn-pill btn-pill-dark shrink-0"
+                title="Bangkitkan seed biner acak non-nol"
+              >
+                Acak Seed
+              </button>
+              <button
+                type="button"
+                id="btn-fix-seed"
+                class="btn-pill btn-pill-danger shrink-0 hidden"
+              >
+                Perbaiki
+              </button>
+            </div>
+            <span class="text-[11px] text-[#b3b3b3]">
+              Urutan bit dari kiri ke kanan: MSB (b<sub>n-1</sub>) hingga LSB (b<sub>0</sub>). All-zero dilarang.
+            </span>
+          </div>
+
+          <!-- Preset Polinomial Primitif -->
+          <div class="elevated-card flex flex-col gap-2">
+            <label for="select-tap-preset" class="caption-label">
+              PRESET POLINOMIAL PRIMITIF GF(2)
+            </label>
+            <select id="select-tap-preset" class="input-pill mono-code"></select>
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+              <span id="live-polynomial-formula" class="text-[#ffa42b] font-bold mono-code">
+                P(x) = x^4 + x + 1
+              </span>
+              <span id="live-tap-equation" class="text-[#1ed760] font-bold mono-code">
+                b_new = b1 ⊕ b0
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris Pemilihan Posisi Tap Aktif & Input Pesan -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Tombol Toggle Posisi Tap -->
+          <div class="elevated-card lg:col-span-5 flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between">
+              <span class="caption-label">POSISI TAP UMPAN BALIK AKTIF (KLIK UNTUK TOGGLE)</span>
+              <span class="status-badge badge-orange mono-code">WARNA TAP: #FFA42B</span>
+            </div>
+            <div
+              id="tap-toggles-container"
+              class="flex flex-wrap items-center gap-2"
+              role="group"
+              aria-label="Pemilihan Posisi Tap Register LFSR"
+            ></div>
+            <p class="text-[11px] text-[#b3b3b3] m-0">
+              Minimal 1 posisi tap wajib aktif. Polinomial primitif menghasilkan periode maksimum 2<sup>n</sup> - 1.
+            </p>
+          </div>
+
+          <!-- Input Pesan & Aksi Inisialisasi -->
+          <div class="elevated-card lg:col-span-7 flex flex-col justify-between gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <label id="label-message-input" for="input-message" class="caption-label">
+                INPUT PESAN PLAINTEXT (ASCII / UTF-8)
+              </label>
+              <span id="message-length-info" class="status-badge badge-blue mono-code">
+                2 Byte • 16 Bit (16 Clock)
+              </span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <input
+                type="text"
+                id="input-message"
+                class="input-pill mono-code"
+                value="HI"
+                placeholder="Ketik pesan teks, misal: HI"
+                autocomplete="off"
+              />
+              <button type="button" id="btn-init-simulation" class="btn-pill btn-pill-primary shrink-0">
+                Inisialisasi Mesin
+              </button>
+              <button type="button" id="btn-clear-input" class="btn-pill btn-pill-outline shrink-0">
+                Kosongkan
+              </button>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <label for="toggle-compact-mode" class="inline-flex items-center gap-2 text-xs text-[#b3b3b3]">
+                <input
+                  type="checkbox"
+                  id="toggle-compact-mode"
+                  class="w-4 h-4 accent-[#1ed760] rounded"
+                />
+                <span>Mode Ringkas 60fps (Otomatis aktif jika input &gt; 32 karakter / 256 bit)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Peringatan Validasi Error (#f3727f) -->
+        <div
+          id="validation-alert-box"
+          class="alert-banner alert-error mt-4 hidden"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div class="flex items-center gap-2.5">
+            <span class="status-badge badge-red">VALIDASI GAGAL</span>
+            <span id="validation-alert-text">Parameter belum valid.</span>
+          </div>
+          <button type="button" id="btn-validation-quick-fix" class="btn-pill btn-pill-danger">
+            Perbaiki Otomatis
+          </button>
+        </div>
+
+        <!-- Peringatan Siklus Berulang (#ffa42b) -->
+        <div
+          id="period-warning-box"
+          class="alert-banner alert-warning mt-3 hidden"
+          role="status"
+          aria-live="polite"
+        >
+          <div class="flex items-center gap-2.5">
+            <span class="status-badge badge-orange">INFO PERIODE SIKLUS</span>
+            <span id="period-warning-text"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 2: PEMETAAN KARAKTER KE BINER 8-BIT -->
+      <section aria-labelledby="heading-panel-2" class="surface-panel">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 mb-4 border-b border-[#272727]">
+          <div>
+            <h2 id="heading-panel-2" class="feature-heading">
+              2. Tahap 1: Pemetaan Karakter ke Aliran Biner 8-Bit (Big-Endian)
+            </h2>
+            <p id="panel2-subtitle" class="text-xs text-[#b3b3b3] mt-0.5">
+              Setiap karakter dipecah menjadi kode desimal ASCII/UTF-8, nilai Hexadecimal, dan 8 kotak bit (MSB ke LSB). Klik kotak bit mana saja untuk melompat ke clock tersebut.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="status-badge badge-green">Bit Aktif: #1ED760</span>
+            <span class="status-badge badge-blue">Selesai: #539DF5</span>
+          </div>
+        </div>
+
+        <div
+          id="char-cards-container"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"
+        ></div>
+      </section>
+
+      <!-- PANEL 3: VISUALISASI REGISTER GESER LFSR & SIRKUIT TAP SVG -->
+      <section aria-labelledby="heading-panel-3" class="surface-panel">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 mb-4 border-b border-[#272727]">
+          <div>
+            <h2 id="heading-panel-3" class="feature-heading">
+              3. Tahap 2: Visualisasi Register Geser LFSR &amp; Sirkuit Tap SVG
+            </h2>
+            <p class="text-xs text-[#b3b3b3] mt-0.5">
+              Pada setiap detak clock, bit posisi Tap (#ffa42b) di-XOR untuk membentuk bit baru b<sub>new</sub> (#1ed760) di kiri, seluruh bit bergeser ke kanan, dan b<sub>0</sub> keluar sebagai Keystream K<sub>t</sub> (#539df5).
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="stage-state-badge" class="status-badge badge-blue mono-code">STATE AWAL (SEED)</span>
+            <span id="stage-clock-indicator" class="status-badge badge-green mono-code">CLOCK: 0 / 16</span>
+          </div>
+        </div>
+
+        <!-- Kanvas Sirkuit SVG & Deretan Kotak Register -->
+        <div class="lfsr-stage-wrapper mb-4">
+          <div id="lfsr-circuit-canvas" class="lfsr-circuit-canvas">
+            <!-- Overlay Sirkuit SVG Dinamis -->
+            <svg id="tap-circuit-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+
+            <!-- Gerbang XOR Umpan Balik -->
+            <div id="xor-gate-badge" class="xor-gate-node">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffa42b] text-black font-bold">
+                ⊕
+              </span>
+              <span id="xor-gate-formula-text">b_new = b1 ⊕ b0 = 1</span>
+            </div>
+
+            <!-- Baris Kotak Umpan Balik Masuk, Deretan Register [b_{n-1}..b_0], dan Slot Bit Keluar -->
+            <div class="lfsr-row">
+              <!-- Slot Umpan Balik Masuk (b_new) -->
+              <div id="feedback-slot-box" class="io-slot-box io-slot-feedback shrink-0">
+                <span class="text-[10px] font-bold uppercase tracking-wider">Umpan Balik (b<sub>new</sub>)</span>
+                <span id="feedback-slot-val" class="text-2xl font-bold mt-0.5">1</span>
+                <span class="text-[10px] opacity-80">Masuk ke MSB →</span>
+              </div>
+
+              <!-- Deretan Register Geser [b_{n-1}, ..., b_0] -->
+              <div
+                id="register-cells-track"
+                class="register-cells-track"
+                role="region"
+                aria-label="Deretan Sel Register LFSR"
+              ></div>
+
+              <!-- Slot Bit Keluar Keystream (K_t = b_0) -->
+              <div id="output-slot-box" class="io-slot-box io-slot-output shrink-0">
+                <span class="text-[10px] font-bold uppercase tracking-wider">Bit Keluar (K<sub>t</sub> = b<sub>0</sub>)</span>
+                <span id="output-slot-val" class="text-2xl font-bold mt-0.5">--</span>
+                <span class="text-[10px] opacity-80">→ Antrean Keystream</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Penjelasan Naratif Dinamis -->
+        <div class="elevated-card mb-4 flex items-center gap-3">
+          <span class="status-badge badge-green shrink-0">NARASI LANGKAH</span>
+          <p id="narrative-explanation-box" class="text-xs text-white mono-code m-0"></p>
+        </div>
+
+        <!-- Antrean Keystream Terbentuk -->
+        <div class="mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="caption-label">ANTREAN KEYSTREAM TERBENTUK (K<sub>1</sub> .. K<sub>L</sub>)</span>
+            <span id="keystream-hex-preview" class="status-badge badge-blue mono-code">HEX: --</span>
+          </div>
+          <div
+            id="keystream-queue-container"
+            class="keystream-strip"
+            role="region"
+            aria-label="Deretan Bit Keystream"
+          ></div>
+        </div>
+
+        <!-- Kontrol Pemutar Simulasi (Spotify Transport Bar Style) -->
+        <div class="floating-bar p-4 flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              type="button"
+              id="btn-step-reset"
+              class="btn-pill btn-pill-dark"
+              title="Reset simulasi kembali ke Clock 0"
+            >
+              |&lt; Reset
+            </button>
+            <button
+              type="button"
+              id="btn-step-prev"
+              class="btn-pill btn-pill-dark"
+              title="Mundur 1 detak clock (Step -1)"
+            >
+              &lt; Step -1
+            </button>
+
+            <!-- Tombol Bulat Circular Play / Pause (#1ed760, border-radius: 50%) -->
+            <button
+              type="button"
+              id="btn-auto-play"
+              class="btn-circle-play"
+              aria-label="Jalankan Auto-Play"
+              title="Jalankan atau hentikan Auto-Play simulasi"
+            >
+              <svg id="icon-auto-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              id="btn-step-next"
+              class="btn-pill btn-pill-dark"
+              title="Maju 1 detak clock (Step +1)"
+            >
+              Step +1 &gt;
+            </button>
+            <button
+              type="button"
+              id="btn-step-byte"
+              class="btn-pill btn-pill-dark"
+              title="Lompat maju 8 bit (1 karakter / byte)"
+            >
+              +8 Bit &gt;&gt;
+            </button>
+            <button
+              type="button"
+              id="btn-step-instant"
+              class="btn-pill btn-pill-outline"
+              title="Lompat langsung ke hasil akhir seluruh clock"
+            >
+              Hasil Instan &gt;|
+            </button>
+          </div>
+
+          <!-- Pilihan Kecepatan Auto-Play (0.5x - 5x) -->
+          <div class="flex items-center gap-2">
+            <span class="caption-label">KECEPATAN:</span>
+            <div class="mode-pill-group" role="group" aria-label="Pilih Kecepatan Auto-Play">
+              <button type="button" class="mode-pill-btn" data-speed="0.5" aria-pressed="false">0.5x</button>
+              <button type="button" class="mode-pill-btn" data-speed="1" aria-pressed="true">1x</button>
+              <button type="button" class="mode-pill-btn" data-speed="2" aria-pressed="false">2x</button>
+              <button type="button" class="mode-pill-btn" data-speed="5" aria-pressed="false">5x</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 4: MATRIKS PERBANDINGAN BITWISE XOR & OUTPUT AKHIR -->
+      <section aria-labelledby="heading-panel-4" class="surface-panel">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 mb-4 border-b border-[#272727]">
+          <div>
+            <h2 id="heading-panel-4" class="feature-heading">
+              4. Tahap 3: Matriks Perbandingan Bitwise XOR &amp; Output Akhir
+            </h2>
+            <p class="text-xs text-[#b3b3b3] mt-0.5">
+              Perbandingan sejajar bit demi bit antara pesan input, Keystream LFSR (K<sub>t</sub>), dan hasil operasi XOR (C<sub>t</sub> = P<sub>t</sub> ⊕ K<sub>t</sub>).
+            </p>
+          </div>
+
+          <button type="button" id="btn-test-decrypt-result" class="btn-pill btn-pill-primary">
+            Uji Dekripsi Hasil Ini
+          </button>
+        </div>
+
+        <!-- Tabel Matriks XOR -->
+        <div id="xor-matrix-container" class="xor-matrix-scroll mb-5"></div>
+
+        <!-- Kartu Ringkasan Output Akhir (Hexadecimal, Biner, Teks ASCII, Keystream) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Output Hexadecimal -->
+          <div class="elevated-card flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between">
+              <span class="caption-label">HASIL AKHIR (HEXADECIMAL)</span>
+              <span class="status-badge badge-green">FORMAT AMAN</span>
+            </div>
+            <div
+              id="output-hex-value"
+              class="p-3 rounded-md bg-[#121212] text-[#1ed760] font-bold text-base mono-code break-all"
+            >
+              D2 B8
+            </div>
+            <button type="button" id="btn-copy-hex" class="btn-pill btn-pill-dark w-full">
+              Salin Hexadecimal
+            </button>
+          </div>
+
+          <!-- Output Biner 8-Bit -->
+          <div class="elevated-card flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between">
+              <span class="caption-label">HASIL AKHIR (BINER 8-BIT)</span>
+              <span class="status-badge badge-blue">BIG-ENDIAN</span>
+            </div>
+            <div
+              id="output-bin-value"
+              class="p-3 rounded-md bg-[#121212] text-white font-bold text-xs mono-code break-all leading-relaxed"
+            >
+              11010010 10111000
+            </div>
+            <button type="button" id="btn-copy-bin" class="btn-pill btn-pill-dark w-full">
+              Salin Biner
+            </button>
+          </div>
+
+          <!-- Output Teks ASCII / UTF-8 -->
+          <div class="elevated-card flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between">
+              <span class="caption-label">HASIL DEKODE TEKS (ASCII)</span>
+              <span class="status-badge badge-orange">KARAKTER</span>
+            </div>
+            <div>
+              <div
+                id="output-ascii-value"
+                class="p-3 rounded-md bg-[#121212] text-white font-bold text-base mono-code break-all"
+              >
+                ··
+              </div>
+              <p id="output-ascii-note" class="text-[11px] text-[#b3b3b3] mt-1.5 mb-0"></p>
+            </div>
+            <button type="button" id="btn-copy-ascii" class="btn-pill btn-pill-dark w-full">
+              Salin Teks ASCII
+            </button>
+          </div>
+
+          <!-- Ringkasan Keystream Terbangkit -->
+          <div class="elevated-card flex flex-col justify-between gap-3">
+            <div class="flex items-center justify-between">
+              <span class="caption-label">KEYSTREAM LFSR (K<sub>1</sub>..K<sub>L</sub>)</span>
+              <span class="status-badge badge-blue">ALIRAN KUNCI</span>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="p-2.5 rounded-md bg-[#121212] text-[#539df5] font-bold text-sm mono-code break-all">
+                HEX: <span id="output-ks-hex-value">9A F1</span>
+              </div>
+              <div
+                id="output-ks-bin-value"
+                class="p-2.5 rounded-md bg-[#121212] text-[#cbcbcb] text-xs mono-code break-all"
+              >
+                10011010 11110001
+              </div>
+            </div>
+            <span class="text-[11px] text-[#b3b3b3]">
+              Keystream identik digunakan untuk enkripsi maupun dekripsi simetris.
+            </span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div
+      id="toast-feedback"
+      class="fixed bottom-6 right-6 z-50 floating-bar px-5 py-3 text-xs font-bold text-[#1ed760] border border-[#1db954] hidden"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <!-- ====================================================================
+         FOOTER
+         ==================================================================== -->
+    <footer class="mt-6 text-center text-xs text-[#b3b3b3] py-4">
+      <p class="m-0">
+        CYBER-LFSR Stream Cipher Visual Simulator • Model Matematis Right-Shift LFSR &amp; GF(2) Bitwise XOR • Sistem Desain Gelap Berkontras Tinggi
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
